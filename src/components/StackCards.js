@@ -243,7 +243,7 @@ const CardItem = memo(({ itemView,
 
     useEffect(() => {
         if (scrollY.velocity < 2) {
-            if (isAnimatingView) {
+            if (isAnimatingView && Math.abs(scrollYAnimated.__getValue() - scrollY.dy) >= 0.5) {
                 if (currentIndex === total - 1) {
                     scrollYAnimated.setValue(scrollY.dy <= 0 ? scrollY.dy : 0)
                 } else if (currentIndex === 0) {
