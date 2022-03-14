@@ -23,15 +23,35 @@ export class MainScreen extends Component {
             <View style={styles.container}>
                 <Toolbar title='Carousel sample' />
                 <View style={styles.mainContent}>
-                
-                    <SnapCarousel style={{ width: width, height: 200, marginTop: 15 }}
-                        itemSize={width * 0.75}
+
+                    <SnapCarousel
+                        style={{ width: width, height: 220, marginTop: 15 }}
+                        itemSize={width * 0.7}
                         spacing={10}
                         data={data}
                         renderItem={this.renderItem}
                         onItemSnapped={this.onItemSnapped}
                         showIndicator={true}
                         dotSize={7}
+                        horizontalScroll={true}
+                        loopedCarousel={false}
+                        dotSelectedColor="#bdc3c7"
+                        dotUnSelectedColor='#7f8c8d'
+                        autoScroll={false}
+                        autoScrollInterval={3000}
+                    />
+
+                    <SnapCarousel
+                        style={{ width: 100, height: 100, marginTop: 15 }}
+                        itemSize={100}
+                        spacing={10}
+                        data={data}
+                        renderItem={this.renderItem}
+                        onItemSnapped={this.onItemSnapped}
+                        showIndicator={true}
+                        dotSize={7}
+                        horizontalScroll={false}
+                        loopedCarousel={true}
                         dotSelectedColor="#bdc3c7"
                         dotUnSelectedColor='#7f8c8d'
                         autoScroll={false}
@@ -40,7 +60,7 @@ export class MainScreen extends Component {
 
                     <StackCards data={data}
                         renderItem={this.renderItem}
-                        style={{ width: width * 0.9, height: 470, marginTop: 10 }}
+                        style={{ width: width * 0.9, height: 400 }}
                         containerStyle={{ padding: 15 }}
                         onItemSnapped={this.onItemSnapped}
                     />
@@ -54,6 +74,7 @@ export class MainScreen extends Component {
     }
 
     onItemSnapped = (index) => {
+        console.log('item snapped: ' + index)
     }
 }
 
