@@ -5,7 +5,6 @@ import { elementsThatOverlapOffsets } from 'react-native/Libraries/Lists/Virtual
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-const data = []
 
 /**
  * @param {{
@@ -17,6 +16,8 @@ const data = []
  * }} props 
  */
 const StackCards = (props) => {
+
+    const data = []
 
     data.splice(0, data.length)
     data.push(...props.data)
@@ -217,7 +218,7 @@ const CardItem = memo(({ itemView,
                 }
             }
 
-            if(isAnimatingView){
+            if (isAnimatingView) {
                 Animated.spring(scrollYAnimated, {
                     toValue: valueTo,
                     useNativeDriver: true,
