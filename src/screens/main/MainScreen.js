@@ -7,7 +7,7 @@ import SnapCarousel from '../../components/SnapCarousel'
 const data = [{ id: 1, name: 'Song 1', url: 'https://picsum.photos/200/250' },
 { id: 2, name: 'Song 2', url: 'https://picsum.photos/200/254' },
 { id: 3, name: 'Song 3', url: 'https://picsum.photos/200/253' },
-{ id: 4, name: 'Song 4', url: 'https://picsum.photos/200/255' }]
+{ id: 4, name: 'Song 4', url: 'https://picsum.photos/200/255' },]
 
 
 const width = Dimensions.get('window').width
@@ -34,11 +34,9 @@ export class MainScreen extends Component {
                         showIndicator={true}
                         dotSize={7}
                         horizontalScroll={true}
-                        loopedCarousel={false}
+                        loopedCarousel={true}
                         dotSelectedColor="#bdc3c7"
                         dotUnSelectedColor='#7f8c8d'
-                        autoScroll={false}
-                        autoScrollInterval={3000}
                     />
 
                     <SnapCarousel
@@ -48,14 +46,8 @@ export class MainScreen extends Component {
                         data={data}
                         renderItem={this.renderItem}
                         onItemSnapped={this.onItemSnapped}
-                        showIndicator={true}
-                        dotSize={7}
                         horizontalScroll={false}
                         loopedCarousel={true}
-                        dotSelectedColor="#bdc3c7"
-                        dotUnSelectedColor='#7f8c8d'
-                        autoScroll={false}
-                        autoScrollInterval={3000}
                     />
 
                     <StackCards data={data}

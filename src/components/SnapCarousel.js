@@ -33,11 +33,14 @@ const SnapCarousel = (props) => {
     const scrollX = useRef(new Animated.Value(0)).current
 
     var interval = useRef(null).current
+    const data = useRef([]).current
 
-    const data = []
-    data.splice(0, data.length)
-    if (props.data) {
+    if (data.length === 0 && props.data) {
+        data.splice(0, data.length)
+
+        /** Add temp item for start offset (for horizontal scroll)*/
         data.push({ id: 0 })
+
         if (props.loopedCarousel) {
             for (let i = 0; i < 100; i++) {
                 props.data.forEach((item, index) => {
@@ -49,7 +52,10 @@ const SnapCarousel = (props) => {
                 data.push({ id: data.length, index: index, data: item })
             })
         }
+
+        /** Add temp item for end offset (for horizontal scroll)*/
         data.push({ id: data.length })
+
     }
 
     useEffect(() => {
@@ -76,7 +82,9 @@ const SnapCarousel = (props) => {
     }, [])
 
     const onScroll = (e) => {
-        scrollX.setValue(e.nativeEvent.contentOffset.x)
+        if(Math.abs((scrollX.__getValue() - e.nativeEvent.contentOffset.x)) > 0.5){
+            scrollX.setValue(e.nativeEvent.contentOffset.x)
+        }
     }
 
     const onScrollEnd = (e, props) => {
@@ -128,7 +136,7 @@ const SnapCarousel = (props) => {
                 disableIntervalMomentum={true}
                 overScrollMode='never'
             />
-            {/* Indicator - (not render indicator if vertical*/}
+            {/* Indicator - (not render indicator if vertical scroll mode)*/}
             {props.showIndicator && props.horizontalScroll ?
                 <View style={[{
                     height: props.dotSize,
@@ -154,7 +162,14 @@ const SnapCarousel = (props) => {
     )
 }
 
-const SnapItem = React.memo(({ itemSize, spacing, currentItem, item, index, itemView, horizontalScroll, scrollX }) => {
+const SnapItem = React.memo(({ itemSize,
+    spacing,
+    currentItem,
+    item, index,
+    itemView,
+    horizontalScroll,
+    scrollX }) => {
+
     const inputRange = [
         (index - 2) * itemSize,
         (index - 1) * itemSize,
@@ -165,7 +180,7 @@ const SnapItem = React.memo(({ itemSize, spacing, currentItem, item, index, item
     var scaleX, scaleY, opacity
 
     const isAnimatingView =
-        (currentItem - indexNoOffset <= 1 || currentItem - indexNoOffset >= -1 || currentItem === indexNoOffset) && horizontalScroll
+        (currentItem - indexNoOffset <= 2 || currentItem - indexNoOffset >= -2 || currentItem === indexNoOffset) && horizontalScroll
 
     if (isAnimatingView) {
         scaleY = scrollX.interpolate({
