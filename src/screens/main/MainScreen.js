@@ -34,7 +34,7 @@ export class MainScreen extends Component {
                         showIndicator={true}
                         dotSize={7}
                         horizontalScroll={true}
-                        loopedCarousel={true}
+                        loopedCarousel={false}
                         dotSelectedColor="#bdc3c7"
                         dotUnSelectedColor='#7f8c8d'
                     />
