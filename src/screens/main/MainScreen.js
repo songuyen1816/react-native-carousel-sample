@@ -22,9 +22,9 @@ export class MainScreen extends Component {
             <View style={styles.container}>
                {/* <Toolbar title='Carousel sample' /> */}
                 <View style={styles.mainContent}>
-                    {/* 
+                    
                     <SnapCarousel
-                        style={{ width: width, height: 200, marginTop: 15 }}
+                        style={{ width: width, height: 200 }}
                         itemSize={width * 0.7}
                         spacing={10}
                         data={data}
@@ -36,10 +36,11 @@ export class MainScreen extends Component {
                         loopedCarousel={false}
                         dotSelectedColor="#bdc3c7"
                         dotUnSelectedColor='#7f8c8d'
-                    /> */}
+                        swipeOneItemOnly={false}
+                    />
 
                     <SnapCarousel
-                        style={{ width: 100, height: 100, marginTop: 15 }}
+                        style={{ width: 100, height: 100}}
                         itemSize={100}
                         spacing={10}
                         data={data}
@@ -57,7 +58,7 @@ export class MainScreen extends Component {
 
                     <StackCardList data={data}
                         renderItem={this.renderItem}
-                        style={{ width: width * 0.9, height: 600 }}
+                        style={{ width: width * 0.9, height: 500 }}
                         containerStyle={{ padding: 15 }}
                         onItemSnapped={this.onItemSnapped}
                     />

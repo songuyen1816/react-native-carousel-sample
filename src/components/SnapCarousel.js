@@ -134,7 +134,7 @@ const SnapCarousel = (props) => {
     return (
         <View style={[props.style, { flexDirection: 'column' }]}>
 
-            <View
+            {props.swipeOneItemOnly ? <View
                 // {...panResponder.panHandlers}
                 onTouchStart={e => touchY = e.nativeEvent.pageY}
                 onTouchEnd={e => {
@@ -154,7 +154,9 @@ const SnapCarousel = (props) => {
                     }
                 }}
                 style={{ position: 'absolute', backgroundColor: 'transparent', width: '100%', height: '100%', zIndex: 99 }} />
+                : null}
 
+                
             {/* Carousel */}
             <FlatList
                 onLayout={(e) => {
