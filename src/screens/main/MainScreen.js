@@ -1,8 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity, View, Dimensions, Image } from 'react-native'
 import React, { Component } from 'react'
-import Toolbar from '../../components/Toolbar'
-import StackCards from '../../components/StackCards'
 import SnapCarousel from '../../components/SnapCarousel'
+import StackCardList from '../../components/StackCardList'
 
 const data = [{ id: 1, name: 'Song 1', url: 'https://picsum.photos/200/250' },
 { id: 2, name: 'Song 2', url: 'https://picsum.photos/200/254' },
@@ -21,11 +20,11 @@ export class MainScreen extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Toolbar title='Carousel sample' />
+               {/* <Toolbar title='Carousel sample' /> */}
                 <View style={styles.mainContent}>
-
+                    {/* 
                     <SnapCarousel
-                        style={{ width: width, height: 220, marginTop: 15 }}
+                        style={{ width: width, height: 200, marginTop: 15 }}
                         itemSize={width * 0.7}
                         spacing={10}
                         data={data}
@@ -37,7 +36,7 @@ export class MainScreen extends Component {
                         loopedCarousel={false}
                         dotSelectedColor="#bdc3c7"
                         dotUnSelectedColor='#7f8c8d'
-                    />
+                    /> */}
 
                     <SnapCarousel
                         style={{ width: 100, height: 100, marginTop: 15 }}
@@ -48,14 +47,22 @@ export class MainScreen extends Component {
                         onItemSnapped={this.onItemSnapped}
                         horizontalScroll={false}
                         loopedCarousel={true}
+                        swipeOneItemOnly={true}
                     />
-
-                    <StackCards data={data}
+                    {/* <VerticalSwipeCards
                         renderItem={this.renderItem}
-                        style={{ width: width * 0.9, height: 400 }}
+                        data={data}
+                        style={{ width: 100, height: 100, marginTop: 15 }}
+                    /> */}
+
+                    <StackCardList data={data}
+                        renderItem={this.renderItem}
+                        style={{ width: width * 0.9, height: 600 }}
                         containerStyle={{ padding: 15 }}
                         onItemSnapped={this.onItemSnapped}
                     />
+
+                    
                 </View>
             </View>
         )
@@ -76,12 +83,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        alignItems: 'flex-start',
+        // alignItems: 'flex-start',
+        justifyContent: 'center',
     },
     mainContent: {
         width: '100%',
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
     }
 })

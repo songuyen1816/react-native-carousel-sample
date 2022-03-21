@@ -1,4 +1,4 @@
-import { View, Dimensions, Animated, FlatList, StyleSheet } from 'react-native'
+import { View, Dimensions, Animated, FlatList, StyleSheet, PanResponder } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 
 const width = Dimensions.get('window').width
@@ -15,18 +15,20 @@ const width = Dimensions.get('window').width
  * indicatorSpacing: Number,
  * horizontalScroll: Boolean,
  * loopedCarousel: Boolean,
- * swipeOnly: Boolean,
+ * swipeOneItemOnly: Boolean,
  * dotSize: Number,
  * dotSelectedColor: String,
  * dotUnSelectedColor: String,
  * autoScroll: Boolean,
- * autoScrollInterval: Number
+ * autoScrollInterval: Number,
+ * limitScrollRect: Boolean
  * }} props 
  */
 const SnapCarousel = (props) => {
 
     const flatListRef = useRef(null)
     const [currentItem, setCurrentItem] = useState(0)
+    const [scrollEnabled, setScrollEnabled] = useState(true)
 
     const offset = props.horizontalScroll ? (width - props.itemSize) / 2 : 0
 
@@ -35,6 +37,8 @@ const SnapCarousel = (props) => {
     var interval = useRef(null).current
     const data = useRef([]).current
 
+    var touchY = useRef(0).current
+
     if (data.length === 0 && props.data) {
         data.splice(0, data.length)
 
@@ -42,7 +46,7 @@ const SnapCarousel = (props) => {
         data.push({ id: 0 })
 
         if (props.loopedCarousel) {
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 200; i++) {
                 props.data.forEach((item, index) => {
                     data.push({ id: data.length, index: index, data: item })
                 })
@@ -82,7 +86,7 @@ const SnapCarousel = (props) => {
     }, [])
 
     const onScroll = (e) => {
-        if(Math.abs((scrollX.__getValue() - e.nativeEvent.contentOffset.x)) > 0.5){
+        if (Math.abs((scrollX.__getValue() - e.nativeEvent.contentOffset.x)) > 0.5) {
             scrollX.setValue(e.nativeEvent.contentOffset.x)
         }
     }
@@ -96,14 +100,67 @@ const SnapCarousel = (props) => {
         }
     }
 
+    // const panResponder = useMemo(() =>
+    //     PanResponder.create({
+    //         onStartShouldSetPanResponder: (evt, gestureState) => true,
+    //         onPanResponderStart: (evt, gestureState) => {
+    //         },
+    //         onPanResponderMove: (evt, gestureState) => {
+    //             // console.log(currentItem)
+    //             flatListRef.current.scrollToOffset({
+    //                 animated: false,
+    //                 offset: (currentItem * props.itemSize) - gestureState.dy
+    //             })
+    //         },
+    //         onPanResponderRelease: (evt, gestureState) => {
+    //             if(gestureState.dy > props.itemSize / 2){
+    //                 setCurrentItem(currentItem - 1)
+    //                 flatListRef.current.scrollToOffset({
+    //                     animated: true,
+    //                     offset: ((currentItem - 1) * props.itemSize) 
+    //                 })
+    //             } else if(gestureState.dy < -props.itemSize / 2){
+    //                 setCurrentItem(currentItem + 1)
+    //                 flatListRef.current.scrollToOffset({
+    //                     animated: true,
+    //                     offset: ((currentItem + 1) * props.itemSize) 
+    //                 })
+    //             }
+    //         }
+    //     }), [currentItem]
+    // )
+
+
     return (
         <View style={[props.style, { flexDirection: 'column' }]}>
+
+            <View
+                // {...panResponder.panHandlers}
+                onTouchStart={e => touchY = e.nativeEvent.pageY}
+                onTouchEnd={e => {
+                    if (touchY - e.nativeEvent.pageY > 20) {
+                        flatListRef.current.scrollToOffset({
+                            animated: true,
+                            offset: (currentItem + 1) * props.itemSize
+                        })
+                        setCurrentItem(currentItem + 1)
+                    }
+                    if (touchY - e.nativeEvent.pageY < - 20) {
+                        flatListRef.current.scrollToOffset({
+                            animated: true,
+                            offset: (currentItem - 1) * props.itemSize
+                        })
+                        setCurrentItem(currentItem - 1)
+                    }
+                }}
+                style={{ position: 'absolute', backgroundColor: 'transparent', width: '100%', height: '100%', zIndex: 99 }} />
+
             {/* Carousel */}
             <FlatList
                 onLayout={(e) => {
                     if (props.loopedCarousel) {
-                        flatListRef.current.scrollToIndex({ animated: false, index: (data.length / 2 - 1) })
                         setCurrentItem(data.length / 2 - 1)
+                        flatListRef.current.scrollToIndex({ animated: false, index: (data.length / 2 - 1) })
                     }
                 }}
                 ref={flatListRef}
@@ -134,9 +191,12 @@ const SnapCarousel = (props) => {
                 snapToOffsets={[...Array(data.length)].map((x, i) => (i * props.itemSize))}
                 onMomentumScrollEnd={(e) => { onScrollEnd(e, props) }}
                 disableIntervalMomentum={true}
+                decelerationRate='normal'
                 overScrollMode='never'
+                scrollEnabled={true}
+                onMoveShouldSetResponderCapture={(e) => false}
             />
-            {/* Indicator - (not render indicator if vertical scroll mode)*/}
+            {/* Indicator - (not render indicator if vertical*/}
             {props.showIndicator && props.horizontalScroll ?
                 <View style={[{
                     height: props.dotSize,
