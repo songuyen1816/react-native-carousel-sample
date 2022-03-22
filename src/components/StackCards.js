@@ -33,36 +33,43 @@ const StackCards = (props) => {
     const [currentItem, setCurrentItem] = useState(0)
     const [position, setPosition] = useState({
         x: undefined,
-        y: undefined
+        y: undefined,
+        width: undefined,
+        height: undefined
     })
-
     const [isAnimating, setIsAnimating] = useState(false)
 
+    var ignore = useRef(false).current
+    var firstScroll = useRef(true).current
+
+    var interval = useRef(null).current
 
     const panResponder = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: (evt, gestureState) => true,
+            onPanResponderStart: (evt, gestureState) => {
+                setOnRelease({ release: false, velocity: 0 })
+            },
             onPanResponderMove: (evt, gestureState) => {
-                if (gestureState.dy === 0) {
-                    setOnRelease({ release: false, velocity: 0 })
-                }
                 setScrollY({
                     dy: gestureState.dy,
                     velocity: gestureState.vy
                 })
-
             },
             onPanResponderRelease: (evt, gestureState) => {
-                setOnRelease({ release: true, velocity: Math.abs(gestureState.vy) })
+                if (!ignore) {
+                    firstScroll = true
+                    setOnRelease({ release: true, velocity: Math.abs(gestureState.vy) })
+                }
             }
         })
     ).current
 
     const onIndexChanged = (index) => {
-        setScrollY({
-            dy: 0,
-            velocity: 0
-        })
+        // setScrollY({
+        //     dy: 0,
+        //     velocity: 0
+        // })
         setCurrentItem(index)
         setIsAnimating(false)
     }
@@ -96,10 +103,12 @@ const StackCards = (props) => {
     }
 
     return (
-        <View  {...panResponder.panHandlers} pointerEvents={isAnimating ? 'none' : 'auto'} style={[props.style]} onLayout={(e) => {
+        <View  {...panResponder.panHandlers} pointerEvents={isAnimating ? 'none' : 'auto'} style={[props.style, { overflow: 'hidden' }]} onLayout={(e) => {
             setPosition({
                 x: e.nativeEvent.layout.x,
-                y: e.nativeEvent.layout.y
+                y: e.nativeEvent.layout.y,
+                width: e.nativeEvent.layout.width,
+                height: e.nativeEvent.layout.height
             })
         }}>
             {renderCardItems(position)}
@@ -119,7 +128,7 @@ const CardItem = memo(({ itemView,
     onAnimating }) => {
 
 
-    const screenOffPoint = height - parentPosition.y
+    const screenOffPoint = parentPosition.height + 20
     const centerPoint = (screenOffPoint) / 2
 
     const scrollYAnimated = useRef(new Animated.Value(0)).current
@@ -129,25 +138,28 @@ const CardItem = memo(({ itemView,
     const isCurrentIndex = index === currentIndex
     const isAnimatingView = isNextIndex || isPreviousIndex || isCurrentIndex
 
-    var scaleX, scaleY, translateY
+    const valueListeners = useRef([]).current
+
+
+    var scaleX = undefined, scaleY = undefined, translateY = undefined
 
     switch (index) {
         case currentIndex:
             scaleX = scrollYAnimated.interpolate({
                 inputRange: [-centerPoint, 0],
-                outputRange: [0.7, 1],
+                outputRange: [0.8, 1],
                 extrapolate: 'clamp'
             })
 
             scaleY = scrollYAnimated.interpolate({
                 inputRange: [-centerPoint, 0],
-                outputRange: [0.7, 1],
+                outputRange: [0.8, 1],
                 extrapolate: 'clamp'
             })
 
             translateY = scrollYAnimated.interpolate({
-                inputRange: [5, 50, centerPoint],
-                outputRange: [0, 50, screenOffPoint],
+                inputRange: [5, centerPoint],
+                outputRange: [0, screenOffPoint],
                 extrapolate: 'clamp'
             })
 
@@ -155,16 +167,16 @@ const CardItem = memo(({ itemView,
         case currentIndex + 1:
             scaleX = scrollYAnimated.interpolate({
                 inputRange: [0, centerPoint],
-                outputRange: [0.7, 1],
+                outputRange: [0.8, 1],
                 extrapolate: 'clamp'
             })
             scaleY = scrollYAnimated.interpolate({
                 inputRange: [0, centerPoint],
-                outputRange: [0.7, 1],
+                outputRange: [0.8, 1],
                 extrapolate: 'clamp'
             })
             translateY = scrollYAnimated.interpolate({
-                inputRange: [-centerPoint, 0, centerPoint],
+                inputRange: [-screenOffPoint, 0, screenOffPoint],
                 outputRange: [0, 0, 0],
                 extrapolate: 'clamp'
             })
@@ -172,7 +184,7 @@ const CardItem = memo(({ itemView,
 
         case currentIndex - 1:
             scaleX = scrollYAnimated.interpolate({
-                inputRange: [0, centerPoint],
+                inputRange: [0, screenOffPoint],
                 outputRange: [1.0, 1.1],
                 extrapolate: 'clamp'
             })
@@ -193,13 +205,13 @@ const CardItem = memo(({ itemView,
 
 
     useEffect(() => {
-        if (onRelease.release && scrollYAnimated.__getValue() != 0) {
+        if (onRelease.release) {
             var valueTo
             if (isCurrentIndex) {
-                if (scrollY.velocity < -0.5 && scrollYAnimated.__getValue() < 0) {
+                if (scrollYAnimated.__getValue() < -30 && scrollY.velocity < -0.5) {
                     valueTo = -centerPoint
                 }
-                else if (scrollYAnimated.__getValue() > 0 && scrollY.velocity > 0.5) {
+                else if (scrollYAnimated.__getValue() > 30 && scrollY.velocity > 0.5) {
                     valueTo = centerPoint
                 } else {
                     valueTo = 5
@@ -207,11 +219,11 @@ const CardItem = memo(({ itemView,
             } else if (isNextIndex) {
                 if (scrollY.velocity < 0.5) {
                     valueTo = -100
-                } else {
+                } else if (scrollYAnimated.__getValue() > 0) {
                     valueTo = centerPoint
                 }
             } else if (isPreviousIndex) {
-                if (scrollY.velocity < -0.5) {
+                if (scrollYAnimated.__getValue() < 0 && scrollY.velocity < -0.5) {
                     valueTo = -centerPoint
                 } else {
                     valueTo = 5
@@ -219,36 +231,64 @@ const CardItem = memo(({ itemView,
             }
 
             if (isAnimatingView) {
+                //     Animated.spring(scrollYAnimated, {
+                //         velocity: onRelease.velocity,
+                //         toValue: valueTo,
+                //         useNativeDriver: true
+                //     }).start()
+                const listenerId = scrollYAnimated.addListener((value) => {
+                    // console.log('Value listener: ' + value.value)
+
+
+                    if (Math.abs(value.value - valueTo) < 40) {
+                        // console.log(value.value + '  /  ' + valueTo + ' / ')
+
+                        if (currentIndex == index) {
+                            if (valueTo === centerPoint && index + 1 < total) {
+                                // onAnimating()
+                                onIndexChanged(index + 1)
+
+                            } else if (valueTo === -centerPoint && index - 1 >= 0) {
+                                onIndexChanged(index - 1)
+                            }
+                        }
+                        scrollYAnimated.removeListener(listenerId)
+                    }
+                })
+
+                if (isCurrentIndex) {
+                    if ((valueTo === centerPoint && index + 1 < total) || (valueTo === -centerPoint && index - 1 >= 0)) {
+                        onAnimating()
+                    }
+                }
                 Animated.spring(scrollYAnimated, {
                     toValue: valueTo,
+                    velocity: onRelease.velocity,
                     useNativeDriver: true,
+                    speed: 4,
                 }).start()
-            }
 
-            if (currentIndex == index) {
-                if (valueTo === centerPoint && index + 1 < total) {
-                    onAnimating()
-                    setTimeout(() => {
-                        onIndexChanged(index + 1)
-                    }, 100)
 
-                } else if (valueTo === -centerPoint && index - 1 >= 0) {
-                    onAnimating()
-                    setTimeout(() => {
-                        onIndexChanged(index - 1)
-                    }, 100)
-                }
             }
         }
     }, [onRelease])
 
     useEffect(() => {
-        if (scrollY.velocity < 2 && total > 1) {
+        if (total > 1) {
+            //TODO
             if (isAnimatingView && Math.abs(scrollYAnimated.__getValue() - scrollY.dy) >= 0.5) {
                 if (currentIndex === total - 1) {
-                    scrollYAnimated.setValue(scrollY.dy <= 0 ? scrollY.dy : 0)
+                    if (scrollY.dy < 30) {
+                        scrollYAnimated.setValue(scrollY.dy)
+                    } else {
+                        scrollYAnimated.setValue(30)
+                    }
                 } else if (currentIndex === 0) {
-                    scrollYAnimated.setValue(scrollY.dy >= 0 ? scrollY.dy : 0)
+                    if (scrollY.dy > -30) {
+                        scrollYAnimated.setValue(scrollY.dy)
+                    } else {
+                        scrollYAnimated.setValue(-30)
+                    }
                 } else {
                     scrollYAnimated.setValue(scrollY.dy)
                 }

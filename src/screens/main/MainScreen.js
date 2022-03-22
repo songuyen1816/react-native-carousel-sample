@@ -2,12 +2,12 @@ import { StyleSheet, Text, TouchableOpacity, View, Dimensions, Image } from 'rea
 import React, { Component } from 'react'
 import SnapCarousel from '../../components/SnapCarousel'
 import StackCardList from '../../components/StackCardList'
+import EStyleSheet from 'react-native-extended-stylesheet'
 
 const data = [{ id: 1, name: 'Song 1', url: 'https://picsum.photos/200/250' },
 { id: 2, name: 'Song 2', url: 'https://picsum.photos/200/254' },
 { id: 3, name: 'Song 3', url: 'https://picsum.photos/200/253' },
 { id: 4, name: 'Song 4', url: 'https://picsum.photos/200/255' },]
-
 
 const width = Dimensions.get('window').width
 
@@ -20,11 +20,11 @@ export class MainScreen extends Component {
     render() {
         return (
             <View style={styles.container}>
-               {/* <Toolbar title='Carousel sample' /> */}
+                {/* <Toolbar title='Carousel sample' /> */}
                 <View style={styles.mainContent}>
-                    
+
                     <SnapCarousel
-                        style={{ width: width, height: 200 }}
+                        style={estyles.topSlider}
                         itemSize={width * 0.7}
                         spacing={10}
                         data={data}
@@ -40,7 +40,7 @@ export class MainScreen extends Component {
                     />
 
                     <SnapCarousel
-                        style={{ width: 100, height: 100}}
+                        style={{ width: 100, height: 100 }}
                         itemSize={100}
                         spacing={10}
                         data={data}
@@ -63,7 +63,7 @@ export class MainScreen extends Component {
                         onItemSnapped={this.onItemSnapped}
                     />
 
-                    
+
                 </View>
             </View>
         )
@@ -92,5 +92,12 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+    }
+})
+
+const estyles = EStyleSheet.create({
+    topSlider: {
+        width: '100%',
+        height: 200
     }
 })

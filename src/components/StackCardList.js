@@ -309,7 +309,7 @@ const CardItem = memo(({ itemView,
                     var translateValue = scrollY.dy > 0 ? scrollY.dy * multiple : 0
 
                     if (index === total - 1) {
-                        translateY.setValue(scrollY.dy < 15 ? translateValue : 15 * multiple)
+                        translateY.setValue(scrollY.dy < 130 ? translateValue : 130 * multiple)
                     } else if (index === 0) {
                         translateY.setValue(scrollY.dy > 0 ? translateValue : 0)
                     } else {
